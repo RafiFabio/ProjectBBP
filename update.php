@@ -47,7 +47,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
-    // Refresh data setelah update
     $result = $mysqli->query("SELECT * FROM antrian WHERE id = $id");
     $dat = $result->fetch_assoc();
 }
