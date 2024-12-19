@@ -1,40 +1,25 @@
 <?php
-require 'config.php';  // Menghubungkan ke database atau konfigurasi lainnya
+require 'config.php';
 
-// Mendapatkan data dari enum untuk kategori, lokasi, urgensi
 $enumKategori = enum('kategori');
 $enumLokasi = enum('lokasi');
 $enumUrgensi = enum('tingkat');
 $enumPenyelesaian = enum('penyelesaian');
 
-// Proses form setelah tombol Kirim ditekan
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Ambil data yang dikirimkan dari form
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
     $kategori = $_POST['kategori'];
     $lokasi = $_POST['lokasi'];
     $tingkat = $_POST['tingkat'];
     $deskripsi = $_POST['deskripsi'];
 
-    // Masukkan data ke dalam tabel antrian
     $query = "INSERT INTO antrian (kategori, lokasi, tingkat, deskripsi) VALUES ('$kategori', '$lokasi', '$tingkat', '$deskripsi')";
     if ($mysqli->query($query) === TRUE) {
-        // Kirim email ke admin
-        $to = "admin@example.com";
-        $subject = "Resiko Baru: $kategori - $tingkat";
-        $message = "Kategori: $kategori\nLokasi: $lokasi\nUrgensi: $tingkat\nDeskripsi: $deskripsi";
-        $headers = "From: noreply@example.com";
-
-        if (mail($to, $subject, $message, $headers)) {
-            echo "Data berhasil dikirim dan email terkirim ke admin.";
-        } else {
-            echo "Gagal mengirim email ke admin.";
-        }
+        echo "Data berhasil disimpan.";
     } else {
         echo "Terjadi kesalahan dalam menyimpan data.";
     }
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -71,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <textarea name="deskripsi" id="deskripsi" required></textarea>
         </div>
         <br>
-        <button type="submit">Kirim</button>
+        <button type="submit" name="submit">Kirim</button>
     </form>
     <br>
     <a href="admin.php">Kembali</a>

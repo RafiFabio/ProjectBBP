@@ -48,7 +48,7 @@ $hasil = $mysqli -> query("SELECT * FROM antrian");
                 <td><?= $dat['lokasi'] ?></td>
                 <td><?= $dat['tingkat'] ?></td>
                 <td><?= $dat['deskripsi'] ?></td>
-                <td><?= htmlspecialchars($dat['solusi']); ?></td>
+                <td><?= $dat['solusi']; ?></td>
                 <td><?= $dat['penyelesaian'] ?></td>
                 <td><?= $dat['status'] ?></td>
                 <?php $i++;?>

@@ -123,22 +123,31 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         <br>
         <h3>Solusi</h3>
-        <form method="POST" action="admin.php">
-            <textarea name="solusi" rows="5" placeholder="Solusi..."></textarea>
-            <br>
-            <button type="submit">Kirim Solusi</button>
-        </form>
+<form method="POST" action="admin.php">
+    <input type="hidden" name="id" value="<?= $dat['id']; ?>"> <!-- Include hidden field for ID -->
+    <td><?= htmlspecialchars($dat['solusi']); ?></td>
+    <textarea name="solusi" id="solusi" rows="5" placeholder="Solusi..." required></textarea>
+    <button type="submit">Kirim Solusi</button>
+</form>
 
-       <?php
-       if ($_SERVER["REQUEST_METHOD"] == "POST" && !empty($_POST['solusi']) && isset($_POST['id'])) {
-           $solusi = htmlspecialchars($_POST['solusi']);
-           $id = (int)$_POST['id'];
-       
-           // Simpan solusi ke database
-           $mysqli->query("UPDATE antrian SET solusi = '$solusi' WHERE id = $id");
-       
-           echo "<div><strong>Solusi Anda:</strong> <p>" . nl2br($solusi) . "</p></div>";
-       }
+<?php
+// Check if form is submitted and required data is present
+if ($_SERVER["REQUEST_METHOD"] == "POST" && !empty($_POST['solusi']) && isset($_POST['id'])) {
+    $solusi = htmlspecialchars($_POST['solusi']);
+    $id = (int)$_POST['id']; // Cast to integer to avoid SQL injection
+
+    // Prepare and execute the update query with prepared statements
+    if ($stmt = $mysqli->prepare("UPDATE antrian SET solusi = ? WHERE id = ?")) {
+        $stmt->bind_param("si", $solusi, $id); // "si" means string and integer types
+        $stmt->execute();
+        $stmt->close();
+
+        // Display the solution after submitting
+        echo "<div><strong>Solusi Anda:</strong> <p>" . nl2br($solusi) . "</p></div>";
+    } else {
+        echo "Error preparing the query.";
+    }
+}
        ?>       
 
         <?php else: ?>
