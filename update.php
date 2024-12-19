@@ -5,7 +5,6 @@ $id = isset($_POST['id']) ? (int)$_POST['id'] : (isset($_GET['id']) ? (int)$_GET
 
 $query = "SELECT * FROM antrian WHERE id = $id";
 $result = $mysqli->query($query);
-
 $dat = $result->fetch_assoc();
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -13,18 +12,42 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $urgensi = htmlspecialchars($_POST['urgensi']);
         $id = (int)$_POST['id'];
 
-        $updateQuery = "UPDATE antrian SET tingkat = '$urgensi' WHERE id = $id";
-        $mysqli->query($updateQuery);
+        $updateQuery = "UPDATE antrian SET tingkat = ? WHERE id = ?";
+        if ($stmt = $mysqli->prepare($updateQuery)) {
+            $stmt->bind_param("si", $urgensi, $id);
+            $stmt->execute();
+            $stmt->close();
+        }
     }
 
     if (isset($_POST['status']) && isset($_POST['id'])) {
         $status = htmlspecialchars($_POST['status']);
         $id = (int)$_POST['id'];
 
-        $updateQuery = "UPDATE antrian SET penyelesaian = '$status' WHERE id = $id";
-        $mysqli->query($updateQuery);
+        $updateQuery = "UPDATE antrian SET penyelesaian = ? WHERE id = ?";
+        if ($stmt = $mysqli->prepare($updateQuery)) {
+            $stmt->bind_param("si", $status, $id);
+            $stmt->execute();
+            $stmt->close();
+        }
     }
 
+    if (isset($_POST['solusi']) && isset($_POST['id'])) {
+        $solusi = htmlspecialchars($_POST['solusi']);
+        $id = (int)$_POST['id'];
+
+        $updateQuery = "UPDATE antrian SET solusi = ? WHERE id = ?";
+        if ($stmt = $mysqli->prepare($updateQuery)) {
+            $stmt->bind_param("si", $solusi, $id);
+            $stmt->execute();
+            $stmt->close();
+
+            header("Location: admin.php");
+            exit;
+        }
+    }
+
+    // Refresh data setelah update
     $result = $mysqli->query("SELECT * FROM antrian WHERE id = $id");
     $dat = $result->fetch_assoc();
 }
@@ -123,29 +146,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         <br>
         <h3>Solusi</h3>
-<form method="POST" action="admin.php">
-    <input type="hidden" name="id" value="<?= $dat['id']; ?>">
-    <td><?= htmlspecialchars($dat['solusi']); ?></td>
-    <textarea name="solusi" id="solusi" rows="5" placeholder="Solusi..." required></textarea>
-    <button type="submit">Kirim Solusi</button>
-</form>
-
-<?php
-if ($_SERVER["REQUEST_METHOD"] == "POST" && !empty($_POST['solusi']) && isset($_POST['id'])) {
-    $solusi = htmlspecialchars($_POST['solusi']);
-    $id = (int)$_POST['id'];
-
-    if ($stmt = $mysqli->prepare("UPDATE antrian SET solusi = ? WHERE id = ?")) {
-        $stmt->bind_param("si", $solusi, $id);
-        $stmt->execute();
-        $stmt->close();
-
-        echo "<div><strong>Solusi Anda:</strong> <p>" . nl2br($solusi) . "</p></div>";
-    } else {
-        echo "Error preparing the query.";
-    }
-}
-       ?>       
+        <form method="POST" action="">
+            <input type="hidden" name="id" value="<?= $dat['id']; ?>">
+            <textarea name="solusi" id="solusi" rows="5" placeholder="Solusi..." required><?= htmlspecialchars($dat['solusi']); ?></textarea>
+            <br><br>
+            <button type="submit">Kirim Solusi</button>
+        </form>
 
         <?php else: ?>
             <p>Record tidak ditemukan.</p>
