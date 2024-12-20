@@ -1,8 +1,22 @@
 <?php
 require 'config.php';
 
-$hasil = $mysqli->query("SELECT * FROM antrian WHERE status = 'approved'");
+class Antrian {
+    private $mysqli;
 
+    public function __construct($mysqli) {
+        $this->mysqli = $mysqli;
+    }
+
+    public function getApprovedRisks() {
+        $query = "SELECT * FROM antrian WHERE status = 'approved'";
+        return $this->mysqli->query($query);
+    }
+}
+
+$antrian = new Antrian($mysqli);
+
+$hasil = $antrian->getApprovedRisks();
 ?>
 
 <!DOCTYPE html>
@@ -41,12 +55,8 @@ $hasil = $mysqli->query("SELECT * FROM antrian WHERE status = 'approved'");
     </table>
 
     <br>
-        <form method="POST" action="tambah_u.php" style="display:inline;">
-            <button type="submit" name="tambah">Tambah resiko</button>
-        </form>
-    <br>
-    <br>
-        <button type="submit">Submit</button>
+    <form method="POST" action="tambah_u.php" style="display:inline;">
+        <button type="submit" name="tambah">Tambah resiko</button>
     </form>
     <br>
     <br>

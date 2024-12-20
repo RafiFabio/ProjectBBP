@@ -1,54 +1,81 @@
 <?php
 require 'config.php';
 
-$id = isset($_POST['id']) ? (int)$_POST['id'] : (isset($_GET['id']) ? (int)$_GET['id'] : 0);
+class Antrian {
+    private $mysqli;
 
-$query = "SELECT * FROM antrian WHERE id = $id";
-$result = $mysqli->query($query);
-$dat = $result->fetch_assoc();
+    public function __construct($mysqli) {
+        $this->mysqli = $mysqli;
+    }
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    if (isset($_POST['urgensi']) && isset($_POST['id'])) {
-        $urgensi = htmlspecialchars($_POST['urgensi']);
-        $id = (int)$_POST['id'];
+    public function getAntrianById($id) {
+        $query = "SELECT * FROM antrian WHERE id = ?";
+        if ($stmt = $this->mysqli->prepare($query)) {
+            $stmt->bind_param("i", $id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            return $result->fetch_assoc();
+        }
+        return null;
+    }
 
+    public function updateUrgensi($id, $urgensi) {
         $updateQuery = "UPDATE antrian SET tingkat = ? WHERE id = ?";
-        if ($stmt = $mysqli->prepare($updateQuery)) {
+        if ($stmt = $this->mysqli->prepare($updateQuery)) {
             $stmt->bind_param("si", $urgensi, $id);
             $stmt->execute();
             $stmt->close();
         }
     }
 
-    if (isset($_POST['status']) && isset($_POST['id'])) {
-        $status = htmlspecialchars($_POST['status']);
-        $id = (int)$_POST['id'];
-
+    public function updateStatus($id, $status) {
         $updateQuery = "UPDATE antrian SET penyelesaian = ? WHERE id = ?";
-        if ($stmt = $mysqli->prepare($updateQuery)) {
+        if ($stmt = $this->mysqli->prepare($updateQuery)) {
             $stmt->bind_param("si", $status, $id);
             $stmt->execute();
             $stmt->close();
         }
     }
 
-    if (isset($_POST['solusi']) && isset($_POST['id'])) {
-        $solusi = htmlspecialchars($_POST['solusi']);
-        $id = (int)$_POST['id'];
-
+    public function updateSolusi($id, $solusi) {
         $updateQuery = "UPDATE antrian SET solusi = ? WHERE id = ?";
-        if ($stmt = $mysqli->prepare($updateQuery)) {
+        if ($stmt = $this->mysqli->prepare($updateQuery)) {
             $stmt->bind_param("si", $solusi, $id);
             $stmt->execute();
             $stmt->close();
-
-            header("Location: admin.php");
-            exit;
         }
     }
+}
 
-    $result = $mysqli->query("SELECT * FROM antrian WHERE id = $id");
-    $dat = $result->fetch_assoc();
+$antrian = new Antrian($mysqli);
+
+$id = isset($_POST['id']) ? (int)$_POST['id'] : (isset($_GET['id']) ? (int)$_GET['id'] : 0);
+
+$dat = $antrian->getAntrianById($id);
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    if (isset($_POST['urgensi']) && isset($_POST['id'])) {
+        $urgensi = htmlspecialchars($_POST['urgensi']);
+        $id = (int)$_POST['id'];
+        $antrian->updateUrgensi($id, $urgensi);
+    }
+
+    if (isset($_POST['status']) && isset($_POST['id'])) {
+        $status = htmlspecialchars($_POST['status']);
+        $id = (int)$_POST['id'];
+        $antrian->updateStatus($id, $status);
+    }
+
+    if (isset($_POST['solusi']) && isset($_POST['id'])) {
+        $solusi = htmlspecialchars($_POST['solusi']);
+        $id = (int)$_POST['id'];
+        $antrian->updateSolusi($id, $solusi);
+
+        header("Location: admin.php");
+        exit;
+    }
+
+    $dat = $antrian->getAntrianById($id);
 }
 ?>
 
